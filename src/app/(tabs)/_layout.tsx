@@ -31,18 +31,7 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
-
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>
-          Explore
-        </NativeTabs.Trigger.Label>
-
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="Orders">
+      <NativeTabs.Trigger name="orders">
         <NativeTabs.Trigger.Label>
           Orders
         </NativeTabs.Trigger.Label>
@@ -53,6 +42,27 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="payments">
+        <NativeTabs.Trigger.Label>
+          Payments
+        </NativeTabs.Trigger.Label>
+
+        <NativeTabs.Trigger.Icon
+          src={require('@/assets/images/tabIcons/explore.png')}
+          renderingMode="template"
+        />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="customers">
+  <NativeTabs.Trigger.Label>
+    Customers
+  </NativeTabs.Trigger.Label>
+
+  <NativeTabs.Trigger.Icon
+    src={require('@/assets/images/tabIcons/explore.png')}
+    renderingMode="template"
+  />
+</NativeTabs.Trigger>
     </NativeTabs>
   );
 }

@@ -2,100 +2,96 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+interface StatCardProps {
+  title: string;
+  value: string;
+  description: string;
+  icon?: any;
+  alert?: boolean;
+}
+
 export default function StatCard({
   title,
   value,
   description,
   icon,
   alert = false,
-}) {
+}: StatCardProps) {
   return (
     <View style={[styles.card, alert && styles.alertCard]}>
-
       {/* Title */}
-      <Text style={[styles.title, alert && styles.alertText]}>
-        {title}
-      </Text>
+      <Text style={[styles.title, alert && styles.alertTitle]}>{title}</Text>
 
       {/* Value */}
-      <Text style={[styles.value, alert && styles.alertValue]}>
-        {value}
-      </Text>
+      <Text style={[styles.value, alert && styles.alertValue]}>{value}</Text>
 
       {/* Description */}
       <View style={styles.descriptionRow}>
-
         {icon && (
           <Ionicons
             name={icon}
-            size={11}
-            color={alert ? '#d94b4b' : '#888'}
+            size={13}
+            color={alert ? '#EF4444' : '#64748B'}
           />
         )}
-
-        <Text
-          style={[
-            styles.description,
-            alert && styles.alertText,
-          ]}
-        >
+        <Text style={[styles.description, alert && styles.alertDescription]}>
           {description}
         </Text>
-
       </View>
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    width: '40%',
-    minHeight: 82,
+    width: '48%', // perfectly formats 2-column layout in standard flexbox grid
     backgroundColor: '#ffffff',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#dddddd',
-    borderRadius: 7,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    marginBottom: 8,
+    borderColor: '#F1F5F9',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+    elevation: 2,
   },
-
   alertCard: {
-    backgroundColor: '#fff4f4',
-    borderColor: '#e87979',
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FEE2E2',
   },
-
   title: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#777',
-    lineHeight: 10,
+    color: '#64748B',
+    letterSpacing: 0.5,
   },
-  alertText: {
-    fontSize: 13,
-    color: '#d94b4b',
+  alertTitle: {
+    color: '#EF4444',
   },
   value: {
-    fontSize: 23,
-    fontWeight: '700',
-    color: '#222',
-    marginTop: 1,
-    marginBottom: 2,
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginTop: 4,
+    marginBottom: 6,
+    letterSpacing: -0.5,
   },
-
   alertValue: {
-    color: '#d94b4b',
+    color: '#EF4444',
   },
-
   descriptionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
   },
-
   description: {
-    fontSize: 15,
-    color: '#888',
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  alertDescription: {
+    color: '#F87171',
   },
 });

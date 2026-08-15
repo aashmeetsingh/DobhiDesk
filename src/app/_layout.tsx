@@ -1,16 +1,19 @@
 import { Stack } from 'expo-router';
+import { OrderProvider } from '@/store/OrderContext';
 
 export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="login" />
-      <Stack.Screen name="otp" />
+    <OrderProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="login" />
+        <Stack.Screen name="otp" />
 
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+    </OrderProvider>
   );
 }

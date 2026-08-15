@@ -1,21 +1,51 @@
-import React from 'react';
+import Footer from '@/components/Footer';
+import { authApi } from '@/lib/api';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
+  ActivityIndicator,
+  Alert,
   Image,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-
-import { Ionicons } from '@expo/vector-icons';
 
 export default function Login() {
   const Logo = require('@/assets/images/Logo.png');
+  const [shopName, setShopName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSendOTP = async () => {
+    if (!shopName.trim()) {
+      Alert.alert('Validation Error', 'Please enter your laundry shop name');
+      return;
+    }
+    if (!phone.trim() || phone.length < 10) {
+      Alert.alert('Validation Error', 'Please enter a valid 10-digit phone number');
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      await authApi.sendOtp(phone);
+      router.push({
+        pathname: '/otp',
+        params: { phone, shopName }, // shopName carried forward for the shop-setup call after OTP verify
+      });
+    } catch (err: any) {
+      Alert.alert('Could not send OTP', err.message || 'Please try again.');
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -27,11 +57,9 @@ export default function Login() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-
         {/* Login Card */}
         <View style={styles.card}>
-
-          {/* YOUR LOGO */}
+          {/* LOGO */}
           <Image
             source={Logo}
             style={styles.logo}
@@ -39,322 +67,206 @@ export default function Login() {
           />
 
           {/* App Name */}
-          <Text style={styles.title}>
-            LaundryTrack
-          </Text>
+          <Text style={styles.title}>Dobhi Desk</Text>
 
           {/* Subtitle */}
-          <Text style={styles.subtitle}>
-            Track every order, every time.
-          </Text>
-
+          <Text style={styles.subtitle}>Track every order, every time.</Text>
 
           {/* Form */}
           <View style={styles.form}>
-
             {/* Shop Name */}
-            <Text style={styles.label}>
-              SHOP NAME
-            </Text>
-
+            <Text style={styles.label}>SHOP NAME</Text>
             <View style={styles.inputContainer}>
               <Ionicons
                 name="storefront-outline"
-                size={19}
-                color="#777"
+                size={18}
+                color="#64748B"
               />
-
               <TextInput
                 style={styles.input}
                 placeholder="Enter laundry shop name"
-                placeholderTextColor="#999"
+                placeholderTextColor="#94A3B8"
                 autoCapitalize="words"
+                value={shopName}
+                onChangeText={setShopName}
+                editable={!isSending}
               />
             </View>
 
-
             {/* Phone Number */}
-            <Text style={styles.label}>
-              PHONE NUMBER
-            </Text>
-
+            <Text style={styles.label}>PHONE NUMBER</Text>
             <View style={styles.inputContainer}>
               <Ionicons
                 name="call-outline"
-                size={19}
-                color="#777"
+                size={18}
+                color="#64748B"
               />
-
               <TextInput
                 style={styles.input}
-                placeholder="+91 1234567890"
-                placeholderTextColor="#999"
+                placeholder="Enter 10-digit phone number"
+                placeholderTextColor="#94A3B8"
                 keyboardType="phone-pad"
-                maxLength={15}
+                maxLength={10}
+                value={phone}
+                onChangeText={setPhone}
+                editable={!isSending}
               />
             </View>
 
-
             {/* Send OTP */}
             <TouchableOpacity
-              style={styles.otpButton}
+              style={[styles.otpButton, isSending && styles.otpButtonDisabled]}
               activeOpacity={0.8}
-              onPress={() => router.push('/otp')}
+              onPress={handleSendOTP}
+              disabled={isSending}
             >
-              <Text style={styles.otpText}>
-                Send OTP
-              </Text>
-
-              <Ionicons
-                name="arrow-forward"
-                size={20}
-                color="#fff"
-              />
+              {isSending ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <>
+                  <Text style={styles.otpText}>Send OTP</Text>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={18}
+                    color="#ffffff"
+                  />
+                </>
+              )}
             </TouchableOpacity>
-
           </View>
-
 
           {/* Divider */}
           <View style={styles.divider} />
 
-
           {/* Terms */}
           <Text style={styles.terms}>
             By continuing, you agree to our{' '}
-            <Text style={styles.termsLink}>
-              Terms of Service
-            </Text>
+            <Text style={styles.termsLink}>Terms of Service</Text>
           </Text>
-
         </View>
-
+        <Footer dark />
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-
 const styles = StyleSheet.create({
-
-  // ==========================================
-  // FULL SCREEN
-  // ==========================================
-
   screen: {
     flex: 1,
-    backgroundColor: '#202020',
+    backgroundColor: '#0F172A',
   },
-
   scrollContainer: {
     flexGrow: 1,
-
     justifyContent: 'center',
     alignItems: 'center',
-
     paddingVertical: 30,
   },
-
-
-  // ==========================================
-  // LOGIN CARD
-  // ==========================================
-
   card: {
-    width: '92%',
-    maxWidth: 500,
-
+    width: '90%',
+    maxWidth: 450,
     backgroundColor: '#ffffff',
-
-    borderRadius: 12,
-
-    paddingHorizontal: 20,
-    paddingTop: 25,
-    paddingBottom: 20,
-
-    elevation: 5,
-
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
+    borderRadius: 16,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 24,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
-
-
-  // ==========================================
-  // LOGO
-  // ==========================================
-
   logo: {
-    width: 65,
-    height: 65,
-
+    width: 60,
+    height: 60,
     alignSelf: 'center',
-
-    marginBottom: 10,
+    marginBottom: 12,
   },
-
-
-  // ==========================================
-  // TITLE
-  // ==========================================
-
   title: {
     textAlign: 'center',
-
-    fontSize: 26,
-    fontWeight: '700',
-
-    color: '#222',
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.5,
   },
-
   subtitle: {
     textAlign: 'center',
-
     fontSize: 13,
-
-    color: '#999',
-
-    marginTop: 5,
+    color: '#64748B',
+    marginTop: 4,
     marginBottom: 28,
+    fontWeight: '500',
   },
-
-
-  // ==========================================
-  // FORM
-  // ==========================================
-
   form: {
     width: '100%',
   },
-
-
   label: {
-    fontSize: 12,
-
+    fontSize: 10,
     fontWeight: '700',
-
-    color: '#555',
-
+    color: '#64748B',
     marginBottom: 6,
-
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
-
-
-  // ==========================================
-  // INPUT
-  // ==========================================
-
   inputContainer: {
-    height: 47,
-
+    height: 48,
     width: '100%',
-
     flexDirection: 'row',
     alignItems: 'center',
-
     borderWidth: 1,
-    borderColor: '#d8d8d8',
-
-    borderRadius: 7,
-
-    backgroundColor: '#fafafa',
-
+    borderColor: '#E2E8F0',
+    borderRadius: 10,
+    backgroundColor: '#F8FAFC',
     paddingHorizontal: 12,
-
-    marginBottom: 17,
+    marginBottom: 18,
   },
-
-
   input: {
     flex: 1,
-
     height: '100%',
-
     marginLeft: 8,
-
     fontSize: 14,
-
-    color: '#333',
-
+    color: '#1E293B',
+    fontWeight: '500',
     paddingVertical: 0,
   },
-
-
-  // ==========================================
-  // OTP BUTTON
-  // ==========================================
-
   otpButton: {
-    height: 46,
-
+    height: 48,
     width: '100%',
-
-    borderRadius: 7,
-
-    backgroundColor: '#292929',
-
+    borderRadius: 10,
+    backgroundColor: '#0F172A',
     flexDirection: 'row',
-
     alignItems: 'center',
     justifyContent: 'center',
-
-    gap: 10,
-
-    marginTop: 2,
+    gap: 8,
+    marginTop: 4,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-
-
+  otpButtonDisabled: {
+    opacity: 0.7,
+  },
   otpText: {
-    color: '#fff',
-
+    color: '#ffffff',
     fontSize: 15,
-
-    fontWeight: '600',
+    fontWeight: '700',
   },
-
-
-  // ==========================================
-  // DIVIDER
-  // ==========================================
-
   divider: {
     height: 1,
-
-    backgroundColor: '#eeeeee',
-
+    backgroundColor: '#F1F5F9',
     width: '100%',
-
-    marginTop: 20,
-    marginBottom: 15,
+    marginTop: 24,
+    marginBottom: 16,
   },
-
-
-  // ==========================================
-  // TERMS
-  // ==========================================
-
   terms: {
     textAlign: 'center',
-
     fontSize: 11,
-
-    color: '#999',
-
-    lineHeight: 17,
+    color: '#94A3B8',
+    lineHeight: 16,
   },
-
-
   termsLink: {
-    color: '#777',
-
-    fontWeight: '600',
-
+    color: '#475569',
+    fontWeight: '700',
     textDecorationLine: 'underline',
   },
-
 });
