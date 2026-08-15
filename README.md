@@ -1,56 +1,125 @@
-# Welcome to your Expo app 👋
+# DhobiDesk
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile app for laundry shop owners to digitize order tracking, customer management, and payment records — replacing manual registers with a real-time operations dashboard.
 
-## Get started
+Built as part of a technical internship at Talking Crooks IT Pvt. Ltd.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Overview
 
-2. Start the app
+DhobiDesk lets a laundry/dhobi shop owner:
 
-   ```bash
-   npx expo start
-   ```
+- Log in via phone number + OTP (no passwords)
+- Create and track orders through their full lifecycle (picked up → washing → ironing → ready → delivered)
+- Manage customer profiles, order history, service preferences, and addresses
+- Record payments (cash/UPI/card) and track balances per order
+- View an operations dashboard with live stats — orders this week, revenue this month, overdue pickups, completed orders
+- Export order reports as PDF or CSV
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Tech stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+| Layer | Technology | Why |
+|---|---|---|
+| Mobile frontend | React Native (Expo, Expo Router) | Fast cross-platform build, file-based routing, no native build setup needed during development |
+| Backend | Node.js + Express | Lightweight REST API layer, JavaScript across the whole stack |
+| Database | MongoDB (Atlas or local) | Flexible document model for order/item data; no server setup needed with Atlas's free tier |
+| Auth | JWT + phone OTP | Passwordless login suited to a mobile-first, non-technical user base |
+| PDF generation | pdfkit | Server-side report generation without a headless browser |
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## Project structure
 
-```bash
-npm run reset-project
+```
+DobhiDesk/
+├── backend/                    Node.js + Express + MongoDB API
+│   ├── server.js                entry point
+│   ├── src/
+│   │   ├── app.js                Express app, CORS, route mounting
+│   │   ├── config/db.js           MongoDB connection
+│   │   ├── models/                 Mongoose schemas (Shop, Customer, Order, Payment)
+│   │   ├── middleware/              JWT auth, error handler
+│   │   ├── controllers/              route logic, one file per module
+│   │   ├── routes/                   route definitions, one file per module
+│   │   └── utils/                     OTP store, SMS stub, tag generator
+│   └── .env.example
+│
+└── app/ (or wherever the Expo project root is)
+    ├── lib/api.ts                Shared API client (auth, orders, customers)
+    ├── app/(tabs)/index.tsx       Dashboard
+    ├── app/(tabs)/orders.tsx      Order list, search, filters, export
+    ├── app/(tabs)/customers.tsx   Customer list
+    ├── app/customers/[id].tsx     Customer profile
+    ├── app/neworder.tsx           Order creation form
+    ├── app/login.tsx              Phone entry
+    └── app/otp.tsx                OTP verification
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-### Other setup steps
+## Setup
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### 1. Backend
 
-## Learn more
+```bash
+cd backend
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Fill in `.env`:
+- `MONGO_URI` — a MongoDB Atlas connection string (free M0 tier), including a database name, e.g. `mongodb+srv://user:pass@cluster.mongodb.net/dhobidesk`
+- `JWT_SECRET` — any long random string, e.g. generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+- `CLIENT_ORIGIN` — not required for the mobile app (CORS only applies to browsers), leave as default
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run dev
+```
 
-## Join the community
+Server runs on `http://localhost:5000`. Confirm with `curl http://localhost:5000/health`.
 
-Join our community of developers creating universal apps.
+### 2. Frontend
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+In `lib/api.ts`, set `API_BASE_URL` to your machine's LAN IP (not `localhost` — a physical device or emulator can't resolve that back to your dev machine), e.g. `http://192.168.1.38:5000/api/v1`.
+
+```bash
+npx expo install expo-secure-store expo-file-system expo-sharing
+npm install
+npx expo start
+```
+
+Scan the QR code with Expo Go, or run on a simulator/emulator.
+
+### 3. Try it end-to-end
+
+1. Enter a shop name and phone number on the login screen → Send OTP
+2. In dev mode, the OTP prints to the **backend terminal** (no SMS provider configured yet)
+3. Enter the OTP to log in — this creates the shop record in MongoDB
+4. Create a test order from the dashboard
+5. Confirm it appears in the Orders list and dashboard stats update
+
+---
+
+## Features implemented
+
+- Phone + OTP authentication with JWT sessions
+- Order creation with multiple line items, service type, and scheduling
+- Order lifecycle tracking (stage-by-stage progression)
+- Order search and status filtering
+- Customer profiles with order history, preferences, and editable address
+- Payment recording with automatic balance calculation (MongoDB transactions keep payment writes and order balances consistent)
+- Live dashboard stats (orders this week, revenue this month, overdue, completed)
+- PDF and CSV export of the order report
+
+## Not yet implemented / out of scope for this submission
+
+- Real SMS provider for OTP (currently logs to the server console for development)
+- Customer-facing app or portal (this build is shop-owner/operator-only)
+- Automated notifications to customers on order stage changes
+- Multi-branch/franchise support
+- Online payment gateway integration (payments are recorded, not processed, in this build)
+- Pagination beyond the first page of results in the Orders list
+
+---
